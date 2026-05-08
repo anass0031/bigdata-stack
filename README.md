@@ -139,6 +139,27 @@ Stockage :
 ---
 
 # Lancement du Projet
+## Prérequis
+
+Avant de lancer le projet, assurez-vous d’avoir les éléments suivants installés :
+
+- Docker
+- Docker Compose
+- Python 3.11
+
+Le projet nécessite obligatoirement Python 3.11 pour assurer la compatibilité des dépendances et des services.
+
+Vérification de la version Python :
+
+```bash
+python --version
+```
+
+La sortie doit être similaire à :
+
+```bash
+Python 3.11.x
+```
 
 ## 1. Build des conteneurs
 
