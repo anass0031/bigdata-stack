@@ -605,7 +605,7 @@ docker compose restart spark-master spark-worker
 ### Solution
 
 ```bash
-docker compose logs -f airflow-webserver
+docker compose logs -f airflow
 ```
 
 Vérifier :
