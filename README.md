@@ -175,33 +175,6 @@ Stockage :
 
 ---
 
-# Variables d’Environnement
-
-Le projet utilise plusieurs variables d’environnement afin de centraliser la configuration des services Docker.
-
-⚠️ Pour des raisons de sécurité et de flexibilité, il est recommandé d’utiliser un fichier `.env`.
-
-## Exemple de fichier `.env`
-
-```env
-POSTGRES_USER=admin
-POSTGRES_PASSWORD=admin123
-POSTGRES_DB=warehouse
-
-AIRFLOW_ADMIN_USER=admin
-AIRFLOW_ADMIN_PASSWORD=admin123
-
-MINIO_ROOT_USER=admin
-MINIO_ROOT_PASSWORD=admin123
-
-KAFKA_BROKER=kafka:9092
-
-METABASE_USER=admin@admin.com
-METABASE_PASSWORD=AdminPassword123!
-```
-
----
-
 # Workflow d’Exécution
 
 Le pipeline fonctionne selon deux modes.
