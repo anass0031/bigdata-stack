@@ -663,16 +663,15 @@ Les données persistantes sont stockées dans :
 # Future Improvements
 
 - NLP Sentiment Analysis
-- Elasticsearch Integration
 - Kubernetes Deployment
 - Real-Time Alerts
 - Machine Learning Predictions
-- CI/CD Pipeline
 - Multi-source News Aggregation
 
 ---
 
 # Auteur
+AADOUD ANASS & GOURAGUINE ZAKARIA
 
 Projet Big Data — Plateforme de Traitement et d’Analyse des News
 
