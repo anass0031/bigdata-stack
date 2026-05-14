@@ -13,7 +13,6 @@ Le projet utilise plusieurs technologies modernes telles que Kafka, Spark, Airfl
 - Structure du Projet
 - Data Layers
 - Services Inclus
-- Variables d’Environnement
 - Workflow d’Exécution
 - Installation
 - Interfaces
