@@ -13,7 +13,7 @@ with DAG(
     'aljazeera_pipeline',
     default_args=default_args,
     description='Scraping incrémental Al Jazeera vers Kafka',
-    schedule_interval='@hourly',
+    schedule_interval='*/5 * * * *',
     start_date=datetime(2026, 5, 8),
     catchup=False,
 ) as dag:

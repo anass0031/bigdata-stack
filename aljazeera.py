@@ -90,7 +90,7 @@ def scrape_article(url, source_name):
         if title_tag:
             titre = title_tag.get_text(strip=True)
 
-        auteur = "Anonyme"
+        auteur = ""
         meta_author = soup.find('meta', attrs={'name': 'author'})
         if meta_author and meta_author.get('content'):
             auteur = meta_author['content']
@@ -173,7 +173,7 @@ def scrape_article(url, source_name):
             else:
                 date_pub = raw_date
 
-        categorie = "news"
+        categorie = ""
         try:
             parts = url.split('/')
             if len(parts) > 3: categorie = parts[3]

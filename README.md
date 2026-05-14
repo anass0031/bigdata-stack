@@ -4,7 +4,67 @@ Projet complet de pipeline Big Data permettant la collecte, le streaming, le tra
 
 Le projet utilise plusieurs technologies modernes telles que Kafka, Spark, Airflow, MinIO, PostgreSQL, Metabase, Prometheus et Grafana.
 
-Structure Docker et configuration fournies dans le projet utilisateur. :contentReference[oaicite:0]{index=0}
+---
+
+# Table des Matières
+
+- Architecture
+- Technologies Utilisées
+- Structure du Projet
+- Data Layers
+- Services Inclus
+- Variables d’Environnement
+- Workflow d’Exécution
+- Installation
+- Interfaces
+- Monitoring
+- Pipeline Streaming
+- DAGs Airflow
+- Configuration Kafka
+- Configuration PostgreSQL
+- Commandes Docker
+- Troubleshooting
+- Fonctionnalités
+- Réseau Docker
+- Stockage des Données
+- Future Improvements
+
+---
+
+# Architecture du Pipeline
+
+```text
+  +-------------+   +-------------+     
+  | CNN Stream  |   | AlJazeera   |
+  |  (Realtime) |   | DAG (1h)    |
+  +------+------+   +------+------+ 
+         |                 |
+         +--------+--------+
+                  |
+                  v
+           +-------------+
+           |   Kafka     |
+           +------+------+ 
+                  |
+                  v
+       +---------------------+   
+       | Bronze/Silver Layer |   
+       |      (Realtime)     |     
+       |        MinIO        |
+       +----------+----------+ 
+                  |
+                  v
+           +-------------+
+           | Gold Layer  |
+           |  DAG (1h)   |
+           | PostgreSQL  |
+           +------+------+ 
+                  |       
+                  v       
+           +-------------+
+           |  Metabase   | 
+           +-------------+ 
+```
 
 ---
 
@@ -19,36 +79,8 @@ Structure Docker et configuration fournies dans le projet utilisateur. :contentR
 - Prometheus
 - Grafana
 - Docker & Docker Compose
-- Python
-
----
-
-# Architecture du Projet
-
-Le pipeline suit une architecture Big Data moderne :
-
-1. Les articles sont récupérés depuis :
-   - CNN
-   - Al Jazeera
-
-2. Les données sont envoyées en streaming via Kafka.
-
-3. Spark Streaming consomme les données Kafka et effectue les traitements.
-
-4. Les données sont stockées dans plusieurs couches :
-   - Bronze Layer → données brutes
-   - Silver Layer → données nettoyées
-   - Gold Layer → données analytiques finales
-
-5. Airflow orchestre les workflows ETL.
-
-6. PostgreSQL stocke les données du Data Warehouse.
-
-7. Metabase fournit les dashboards analytiques.
-
-8. Prometheus collecte les métriques.
-
-9. Grafana affiche les dashboards de monitoring.
+- Python 3.11
+- Streamlit
 
 ---
 
@@ -63,6 +95,7 @@ bigdata-stack/
 ├── Dockerfile.airflow
 ├── prometheus.yml
 ├── requirements.txt
+├── logs_dashboard.py
 │
 ├── dags/
 │   ├── aljazeera_dag.py
@@ -87,7 +120,7 @@ bigdata-stack/
 
 ---
 
-# Couches de Données (Data Layers)
+# Data Layers
 
 ## Bronze Layer
 
@@ -111,13 +144,16 @@ Stockage :
 
 ## Gold Layer
 
-Contient les données finales utilisées pour :
-- les dashboards
-- les statistiques
-- les analyses métiers
+Contient les données analytiques finales.
+
+Utilisation :
+- statistiques
+- dashboards
+- analyses métier
+- reporting BI
 
 Stockage :
-- PostgreSQL (warehouse)
+- PostgreSQL Data Warehouse
 
 ---
 
@@ -135,19 +171,92 @@ Stockage :
 | Metabase | Dashboard analytique |
 | Prometheus | Collecte des métriques |
 | Grafana | Visualisation et monitoring |
+| Streamlit Logs Dashboard | Analyse temps réel des logs |
 
 ---
 
-# Lancement du Projet
+# Variables d’Environnement
+
+Le projet utilise plusieurs variables d’environnement afin de centraliser la configuration des services Docker.
+
+⚠️ Pour des raisons de sécurité et de flexibilité, il est recommandé d’utiliser un fichier `.env`.
+
+## Exemple de fichier `.env`
+
+```env
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin123
+POSTGRES_DB=warehouse
+
+AIRFLOW_ADMIN_USER=admin
+AIRFLOW_ADMIN_PASSWORD=admin123
+
+MINIO_ROOT_USER=admin
+MINIO_ROOT_PASSWORD=admin123
+
+KAFKA_BROKER=kafka:9092
+
+METABASE_USER=admin@admin.com
+METABASE_PASSWORD=AdminPassword123!
+```
+
+---
+
+# Workflow d’Exécution
+
+Le pipeline fonctionne selon deux modes.
+
+## Streaming Temps Réel
+
+Les services suivants fonctionnent en continu en mode streaming :
+
+- `cnn-streamer`
+- `spark-streaming-job`
+
+### Fonctionnement
+
+1. `cnn-streamer` scrape les articles CNN en continu.
+2. Les données sont envoyées vers Kafka.
+3. `spark-streaming-job` consomme les données Kafka.
+4. Spark traite les flux en temps réel.
+5. Les données sont stockées dans le Bronze Layer.
+6. Les données nettoyées sont envoyées dans le Silver Layer.
+
+---
+
+## Traitement Planifié
+
+Les DAGs Airflow suivants sont exécutés automatiquement chaque heure :
+
+- `aljazeera_dag.py`
+- `gold_layer_dag.py`
+
+### aljazeera_dag.py
+
+Responsable de :
+- scraper les articles Al Jazeera
+- ingérer les données dans le pipeline
+- envoyer les données vers Kafka
+
+### gold_layer_dag.py
+
+Responsable de :
+- récupérer les données Silver
+- générer les données Gold analytiques
+- charger PostgreSQL
+- mettre à jour les dashboards
+
+---
+
+# Installation
+
 ## Prérequis
 
-Avant de lancer le projet, assurez-vous d’avoir les éléments suivants installés :
+Avant de lancer le projet, assurez-vous d’avoir :
 
 - Docker
 - Docker Compose
 - Python 3.11
-
-Le projet nécessite obligatoirement Python 3.11 pour assurer la compatibilité des dépendances et des services.
 
 Vérification de la version Python :
 
@@ -155,13 +264,24 @@ Vérification de la version Python :
 python --version
 ```
 
-La sortie doit être similaire à :
+Résultat attendu :
 
 ```bash
 Python 3.11.x
 ```
 
-## 1. Build des conteneurs
+---
+
+## Cloner le Projet
+
+```bash
+git clone https://github.com/user/bigdata-stack.git
+cd bigdata-stack
+```
+
+---
+
+## Build des Conteneurs
 
 ```bash
 docker compose build
@@ -169,7 +289,7 @@ docker compose build
 
 ---
 
-## 2. Démarrage des services
+## Démarrage des Services
 
 ```bash
 docker compose up -d
@@ -177,7 +297,7 @@ docker compose up -d
 
 ---
 
-## 3. Vérification des conteneurs
+## Vérification des Conteneurs
 
 ```bash
 docker ps
@@ -185,9 +305,9 @@ docker ps
 
 ---
 
-# Accès aux Interfaces
+# Interfaces
 
-# Airflow
+## Airflow
 
 URL :
 
@@ -202,14 +322,9 @@ Username : admin
 Password : admin123
 ```
 
-Airflow permet :
-- d’exécuter les DAGs
-- d’orchestrer les workflows
-- de surveiller les tâches ETL
-
 ---
 
-# Metabase
+## Metabase
 
 URL :
 
@@ -224,20 +339,9 @@ Email : admin@admin.com
 Password : AdminPassword123!
 ```
 
-Metabase est configuré automatiquement grâce au script :
-
-```text
-init/init_metabase.py
-```
-
-Le script :
-- attend le démarrage de Metabase
-- crée le compte administrateur
-- connecte automatiquement PostgreSQL
-
 ---
 
-# MinIO Console
+## MinIO Console
 
 URL :
 
@@ -253,14 +357,13 @@ Password : admin123
 ```
 
 Buckets créés automatiquement :
+
 - bronze
 - silver
 
-MinIO sert de Data Lake pour le projet.
-
 ---
 
-# Grafana
+## Grafana
 
 URL :
 
@@ -275,14 +378,9 @@ Username : admin
 Password : admin
 ```
 
-Grafana permet :
-- le monitoring du cluster Spark
-- le suivi des DAGs Airflow
-- l’analyse des métriques système
-
 ---
 
-# Prometheus
+## Prometheus
 
 URL :
 
@@ -290,14 +388,9 @@ URL :
 http://localhost:9090/
 ```
 
-Prometheus collecte les métriques depuis :
-- Spark
-- Airflow
-- StatsD Exporter
-
 ---
 
-# Spark Master UI
+## Spark Master UI
 
 URL :
 
@@ -305,15 +398,9 @@ URL :
 http://localhost:8080/
 ```
 
-Permet de surveiller :
-- les applications Spark
-- les workers
-- les jobs actifs
-- les executors
-
 ---
 
-# Spark Worker UI
+## Spark Worker UI
 
 URL :
 
@@ -321,27 +408,53 @@ URL :
 http://localhost:8081/
 ```
 
-Permet de surveiller :
-- l’utilisation CPU/RAM
-- les tâches Spark en cours
+---
+
+# Monitoring
+
+## Grafana
+
+Grafana permet :
+
+- monitoring Spark
+- monitoring Airflow
+- activité streaming
+- suivi système
+- visualisation des métriques
 
 ---
 
-# DAGs Airflow
+## Prometheus
 
-## aljazeera_dag.py
+Prometheus collecte les métriques depuis :
 
-Responsable de :
-- lancer le scraping Al Jazeera
-- gérer l’ingestion des données
+- Spark
+- Airflow
+- StatsD Exporter
+- système Docker
 
 ---
 
-## gold_layer_dag.py
+## Dashboard Logs Streamlit
 
-Responsable de :
-- traiter les données Silver
-- générer les données Gold analytiques
+Application web développée avec Streamlit pour surveiller et analyser les logs des conteneurs Docker en temps réel.
+
+### Lancement
+
+```bash
+streamlit run logs_dashboard.py
+```
+
+### Catégories des Logs
+
+| Onglet | Description |
+|---|---|
+| ERROR | Exceptions et erreurs critiques |
+| WARN | Warnings et timeouts |
+| INFO | Informations système |
+| PRINTS | Résultats Spark et Airflow |
+
+L’application permet de surveiller l’état de toute l’infrastructure Big Data.
 
 ---
 
@@ -356,8 +469,10 @@ cnn-streamer
 ```
 
 Responsabilités :
-- scraper les articles CNN
+
+- scraper CNN
 - envoyer les données vers Kafka
+- streaming temps réel
 
 ---
 
@@ -370,30 +485,45 @@ spark-streaming-job
 ```
 
 Responsabilités :
-- consommer les données Kafka
-- traiter les flux temps réel
-- sauvegarder les données dans MinIO/PostgreSQL
+
+- consommer Kafka
+- traitement streaming
+- transformation des données
+- stockage Bronze/Silver
 
 ---
 
-# Monitoring
+# DAGs Airflow
 
-## Prometheus
+## aljazeera_dag.py
 
-Collecte :
-- métriques Spark
-- métriques Airflow
-- métriques système
+Exécution :
+
+```text
+Chaque heure
+```
+
+Responsabilités :
+
+- scraping Al Jazeera
+- ingestion des données
+- envoi pipeline
 
 ---
 
-## Grafana
+## gold_layer_dag.py
 
-Affiche :
-- monitoring Spark
-- monitoring Airflow
-- activité streaming
-- performances ETL
+Exécution :
+
+```text
+Chaque heure
+```
+
+Responsabilités :
+
+- génération Gold Layer
+- chargement PostgreSQL
+- alimentation dashboards
 
 ---
 
@@ -407,42 +537,25 @@ Password : admin123
 ```
 
 Bases utilisées :
+
 - airflow
 - metabase
 - warehouse
 
 ---
 
-# Initialisation Automatique de Metabase
-
-Le fichier :
-
-```text
-init/init_metabase.py
-```
-
-Permet automatiquement :
-- d’attendre le démarrage de Metabase
-- de créer le compte administrateur
-- d’ajouter la base PostgreSQL warehouse
-- de configurer l’environnement BI
-
----
-
 # Configuration Kafka
-
-Ports Kafka :
 
 | Port | Usage |
 |---|---|
-| 9092 | Communication Docker interne |
+| 9092 | Communication interne Docker |
 | 29092 | Accès localhost |
 
 ---
 
 # Commandes Docker Utiles
 
-## Arrêter les services
+## Arrêter les Services
 
 ```bash
 docker compose down
@@ -450,7 +563,7 @@ docker compose down
 
 ---
 
-## Redémarrer les services
+## Redémarrer les Services
 
 ```bash
 docker compose restart
@@ -458,7 +571,7 @@ docker compose restart
 
 ---
 
-## Voir les logs
+## Voir les Logs
 
 ```bash
 docker compose logs -f
@@ -466,7 +579,7 @@ docker compose logs -f
 
 ---
 
-## Rebuild complet
+## Rebuild Complet
 
 ```bash
 docker compose up --build
@@ -474,16 +587,83 @@ docker compose up --build
 
 ---
 
+# Troubleshooting
+
+## Kafka indisponible
+
+Erreur :
+
+```text
+Connection refused kafka:9092
+```
+
+### Solution
+
+```bash
+docker compose restart kafka
+```
+
+Puis vérifier les logs :
+
+```bash
+docker compose logs -f kafka
+```
+
+---
+
+## Spark Streaming Error
+
+Erreur :
+
+```text
+Spark connection timeout
+```
+
+### Solution
+
+```bash
+docker compose restart spark-master spark-worker
+```
+
+---
+
+## Airflow DAG ne démarre pas
+
+### Solution
+
+```bash
+docker compose logs -f airflow-webserver
+```
+
+Vérifier :
+
+- PostgreSQL
+- Kafka
+- présence des DAGs
+
+---
+
+## Python Version Error
+
+Le projet nécessite :
+
+```text
+Python 3.11
+```
+
+---
+
 # Fonctionnalités du Projet
 
-- Scraping automatique d’articles
+- Scraping automatique
 - Streaming temps réel avec Kafka
-- Traitement Big Data avec Spark
-- Orchestration ETL avec Airflow
-- Data Lake avec MinIO
-- Data Warehouse PostgreSQL
-- Dashboards analytiques avec Metabase
-- Monitoring avec Prometheus et Grafana
+- Traitement Big Data Spark
+- ETL avec Airflow
+- Data Lake MinIO
+- PostgreSQL Warehouse
+- Monitoring Prometheus/Grafana
+- Dashboards analytiques
+- Logs temps réel avec Streamlit
 
 ---
 
@@ -504,6 +684,18 @@ Les données persistantes sont stockées dans :
 ```text
 ./data/
 ```
+
+---
+
+# Future Improvements
+
+- NLP Sentiment Analysis
+- Elasticsearch Integration
+- Kubernetes Deployment
+- Real-Time Alerts
+- Machine Learning Predictions
+- CI/CD Pipeline
+- Multi-source News Aggregation
 
 ---
 

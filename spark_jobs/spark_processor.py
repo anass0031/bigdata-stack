@@ -118,7 +118,11 @@ clean_udf = udf(clean_text, StringType())
 # Transformations Silver
 silver_df = parsed_df \
     .withWatermark("ingestion_time", "1 hour") \
-    .filter(col("titre").isNotNull() & col("url").isNotNull()) \
+    .filter(col("titre").isNotNull() & (col("titre") != "") &
+            col("url").isNotNull() & (col("url") != "") &
+            col("contenu").isNotNull() & (col("contenu") != "") &
+            col("auteur").isNotNull() &  (col("auteur") != "") &
+            col("categorie").isNotNull() & (col("categorie") != "")) \
     .withColumn("contenu_clean", clean_udf(col("contenu"))) \
     .withColumn("titre_clean", clean_udf(col("titre"))) \
     .withColumn("date_parsed", to_date(to_timestamp(col("date_publication")))) \

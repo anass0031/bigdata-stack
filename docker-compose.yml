@@ -190,7 +190,6 @@ services:
       - ./data/airflow/logs:/opt/airflow/logs
       - ./data/airflow/plugins:/opt/airflow/plugins
       - ./spark_jobs:/opt/spark_jobs
-      - ./scraper.py:/opt/airflow/scraper.py
       - ./aljazeera.py:/opt/airflow/aljazeera.py
       - ./data/raw:/opt/airflow/data/raw
     command: >
@@ -204,8 +203,6 @@ services:
   statsd-exporter:
     image: prom/statsd-exporter
     container_name: statsd-exporter
-    volumes:
-      - ./init/statsd_mapping.yml:/etc/statsd-exporter/mapping.yml # Optionnel pour le nommage
     ports:
       - "9102:9102"
       - "9125:9125/udp"

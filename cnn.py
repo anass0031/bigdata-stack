@@ -40,12 +40,12 @@ def scrape_article(url, source_name):
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        titre = "Sans titre"
+        titre = ""
         title_tag = soup.find('h1')
         if title_tag:
             titre = title_tag.get_text(strip=True)
 
-        auteur = "Anonyme"
+        auteur = ""
         meta_author = soup.find('meta', attrs={'name': 'author'})
         if meta_author and meta_author.get('content'):
             auteur = meta_author['content']
@@ -66,7 +66,7 @@ def scrape_article(url, source_name):
         if meta_date and meta_date.get('content'):
             date_pub = meta_date['content']
 
-        categorie = "news"
+        categorie = ""
         try:
             parts = url.split('/')
             if len(parts) > 6: categorie = parts[6]

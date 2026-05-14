@@ -7,19 +7,27 @@
   "panels": [
 
     {
-      "title": "NEWS PIPELINE MONITORING",
+      "title": "NEWS MEDALLION PLATFORM",
       "type": "text",
-      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
       "options": {
         "mode": "markdown",
-        "content": "# News Medallion Architecture Monitoring\n### Kafka • Spark • Airflow • MinIO • PostgreSQL • Grafana"
+        "content": "# News Medallion Architecture Monitoring\n## Real-Time Monitoring Platform\n### Kafka • Spark • Airflow • MinIO • PostgreSQL • Grafana"
       }
     },
 
     {
+      "title": "INFRASTRUCTURE",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 }
+    },
+
+    {
       "title": "SERVICES ACTIFS",
+      "description": "Nombre total des services monitorés",
       "type": "stat",
-      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 3 },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 5 },
       "targets": [
         {
           "expr": "sum(up)",
@@ -27,8 +35,8 @@
         }
       ],
       "options": {
-        "colorMode": "background",
-        "graphMode": "none",
+        "colorMode": "backgroundSolid",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "horizontal",
         "textMode": "value"
@@ -39,8 +47,8 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "green", "value": 1 }
+              { "color": "#d44a3a", "value": null },
+              { "color": "#299c46", "value": 1 }
             ]
           }
         }
@@ -49,8 +57,9 @@
 
     {
       "title": "UTILISATION CPU",
+      "description": "Utilisation globale du CPU",
       "type": "gauge",
-      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 3 },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 5 },
       "targets": [
         {
           "expr": "sum(rate(process_cpu_seconds_total[1m])) * 100",
@@ -65,9 +74,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 70 },
-              { "color": "red", "value": 90 }
+              { "color": "#299c46", "value": null },
+              { "color": "#EAB839", "value": 70 },
+              { "color": "#d44a3a", "value": 90 }
             ]
           }
         }
@@ -76,8 +85,9 @@
 
     {
       "title": "UTILISATION RAM",
+      "description": "Consommation mémoire totale",
       "type": "bargauge",
-      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 3 },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 5 },
       "targets": [
         {
           "expr": "sum(process_resident_memory_bytes) / 1073741824",
@@ -92,9 +102,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 10 },
-              { "color": "red", "value": 14 }
+              { "color": "#299c46", "value": null },
+              { "color": "#EAB839", "value": 10 },
+              { "color": "#d44a3a", "value": 14 }
             ]
           }
         }
@@ -103,8 +113,9 @@
 
     {
       "title": "DÉBIT INGESTION ARTICLES",
+      "description": "Nombre d'articles ingérés par minute",
       "type": "timeseries",
-      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 3 },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 5 },
       "targets": [
         {
           "expr": "rate(news_articles_total[1m])",
@@ -119,6 +130,16 @@
         "tooltip": {
           "mode": "single"
         }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "fillOpacity": 15
+          }
+        }
       }
     },
 
@@ -126,13 +147,14 @@
       "title": "SPARK & AIRFLOW",
       "type": "row",
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 8 }
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 11 }
     },
 
     {
       "title": "Workers Spark Actifs",
+      "description": "Nombre de workers Spark disponibles",
       "type": "gauge",
-      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 9 },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 12 },
       "targets": [
         {
           "expr": "sum(up{job='spark-worker'})",
@@ -147,8 +169,8 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "green", "value": 1 }
+              { "color": "#d44a3a", "value": null },
+              { "color": "#299c46", "value": 1 }
             ]
           }
         }
@@ -157,8 +179,9 @@
 
     {
       "title": "Airflow Status",
+      "description": "État du service Airflow",
       "type": "stat",
-      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 9 },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 12 },
       "targets": [
         {
           "expr": "up{job='airflow'}",
@@ -166,15 +189,17 @@
         }
       ],
       "options": {
-        "colorMode": "background",
-        "graphMode": "none"
+        "colorMode": "backgroundSolid",
+        "graphMode": "area",
+        "justifyMode": "center"
       }
     },
 
     {
       "title": "Applications Spark Running",
+      "description": "Applications Spark actuellement actives",
       "type": "stat",
-      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 9 },
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 12 },
       "targets": [
         {
           "expr": "metrics_master_apps_Value",
@@ -182,8 +207,8 @@
         }
       ],
       "options": {
-        "colorMode": "background",
-        "graphMode": "none",
+        "colorMode": "backgroundSolid",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "horizontal",
         "textMode": "value"
@@ -194,25 +219,25 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "green", "value": 1 }
+              { "color": "#d44a3a", "value": null },
+              { "color": "#299c46", "value": 1 }
             ]
           }
         }
       }
-    },      
+    },
 
     {
       "title": "SCRAPERS & STREAMING",
       "type": "row",
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 }
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 18 }
     },
 
     {
       "title": "CNN Scraper Status",
       "type": "stat",
-      "gridPos": { "h": 5, "w": 4, "x": 0, "y": 16 },
+      "gridPos": { "h": 6, "w": 4, "x": 0, "y": 19 },
       "targets": [
         {
           "expr": "news_script_status{instance='cnn-streamer:8001'}",
@@ -220,26 +245,30 @@
         }
       ],
       "options": {
-        "colorMode": "background"
+        "colorMode": "backgroundSolid",
+        "graphMode": "area"
       }
     },
 
     {
       "title": "CNN Articles",
       "type": "stat",
-      "gridPos": { "h": 5, "w": 4, "x": 4, "y": 16 },
+      "gridPos": { "h": 6, "w": 4, "x": 4, "y": 19 },
       "targets": [
         {
           "expr": "news_articles_total{instance='cnn-streamer:8001'}",
           "refId": "A"
         }
-      ]
+      ],
+      "options": {
+        "graphMode": "area"
+      }
     },
 
     {
       "title": "Bronze/Silver Job Status",
       "type": "stat",
-      "gridPos": { "h": 5, "w": 4, "x": 8, "y": 16 },
+      "gridPos": { "h": 6, "w": 4, "x": 8, "y": 19 },
       "targets": [
         {
           "expr": "news_script_status{instance='spark-streaming-job:8002'}",
@@ -247,62 +276,68 @@
         }
       ],
       "options": {
-        "colorMode": "background"
+        "colorMode": "backgroundSolid",
+        "graphMode": "area"
       }
     },
 
     {
       "title": "Articles Bronze",
       "type": "stat",
-      "gridPos": { "h": 5, "w": 4, "x": 12, "y": 16 },
+      "gridPos": { "h": 6, "w": 4, "x": 12, "y": 19 },
       "targets": [
         {
           "expr": "news_articles_bronze_total{instance='spark-streaming-job:8002'}",
           "refId": "A"
         }
-      ]
+      ],
+      "options": {
+        "graphMode": "area"
+      }
     },
 
     {
       "title": "Articles Silver",
       "type": "stat",
-      "gridPos": { "h": 5, "w": 4, "x": 16, "y": 16 },
+      "gridPos": { "h": 6, "w": 4, "x": 16, "y": 19 },
       "targets": [
         {
           "expr": "news_articles_silver_total{instance='spark-streaming-job:8002'}",
           "refId": "A"
         }
-      ]
+      ],
+      "options": {
+        "graphMode": "area"
+      }
     },
 
     {
       "title": "Articles / Minute",
       "type": "timeseries",
-      "gridPos": { "h": 5, "w": 4, "x": 20, "y": 16 },
+      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 19 },
       "targets": [
         {
           "expr": "rate(news_articles_total[1m]) * 60",
           "refId": "A"
         }
-      ]
-    },
-
-    {
-      "title": "RÉPARTITION DES CATÉGORIES",
-      "type": "piechart",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 21 },
-      "targets": [
-        {
-          "expr": "sum by(category)(news_articles_by_category)",
-          "refId": "A"
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "fillOpacity": 15
+          }
         }
-      ]
+      }
     },
 
     {
       "title": "ÉVOLUTION DES ARTICLES",
+      "description": "Évolution des articles sur les 5 dernières minutes",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 21 },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 25 },
       "targets": [
         {
           "expr": "increase(news_articles_total[5m])",
@@ -314,6 +349,26 @@
           "displayMode": "list",
           "placement": "bottom"
         }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 3,
+            "fillOpacity": 20
+          }
+        }
+      }
+    },
+
+    {
+      "title": "DASHBOARD INFO",
+      "type": "text",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 34 },
+      "options": {
+        "mode": "markdown",
+        "content": "---\n### Monitoring Dashboard v2.0\nReal-Time News Pipeline Observability Platform\nPowered by Kafka • Spark • Airflow • Grafana"
       }
     }
 
