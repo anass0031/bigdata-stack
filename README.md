@@ -411,6 +411,11 @@ Prometheus collecte les métriques depuis :
 
 Application web développée avec Streamlit pour surveiller et analyser les logs des conteneurs Docker en temps réel.
 
+### Installation
+```bash
+pip install streamlit
+```
+
 ### Lancement
 
 ```bash
